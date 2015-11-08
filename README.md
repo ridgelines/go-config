@@ -183,6 +183,38 @@ An example using the `CachedLoader` instead of `OnceLoader`:
     ...
 ```
 
+## Resolvers
+Sometimes, keeping setting keys consistent between different files isn't possible. 
+For example, say the file `config.json` contained:
+```
+{
+    "items": {
+        "server": {
+            "timeout": 30
+        }
+    }
+}
+```
+And another file `config.ini` contained:
+```
+[server]
+timeout=30
+```
+
+The `timeout` setting would have the key `items.server.timeout` for the `json` file and `server.timeout` for the `ini` file when they
+are actually intended to reference the same setting. 
+You can use a `Resolver` to change the mappings in a provider. 
+For example, wrap the `json` provider in a `Resolver` in order to resolve `items.server.timeout` as `server.timeout`:
+```
+    jsonFile := config.NewJSONFile("config.json")
+    mappings := map[string]string{
+        "items.server.timeout": "server.timeout",
+    }
+
+    resolverJSONFile := config.NewResolver(jsonFile, mappings)
+```
+
+You can now use `server.timeout` as the canonical key for the setting. 
 
 ## Custom Providers
 Custom providers must fulfill the `Provider` interface:
