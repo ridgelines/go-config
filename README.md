@@ -219,4 +219,7 @@ All resolve the `global.timeout` setting to `30`.
 This is allows providers to override and lookup settings using a command key format. 
 
 
+# License
+This work is published under the MIT license.
 
+Please see the `LICENSE` file for details.
