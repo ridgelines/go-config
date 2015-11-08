@@ -1,6 +1,5 @@
 package config
 
 type Provider interface {
-	Load() error
-	GetTokens() map[string]string
+	Load() (map[string]string, error)
 }

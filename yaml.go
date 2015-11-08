@@ -16,27 +16,26 @@ func NewYAMLFile(path string) *YAMLFile {
 	}
 }
 
-func (this *YAMLFile) Load() error {
-	encodedYAML, err := ioutil.ReadFile(this.Path)
+func (this *YAMLFile) Load() (map[string]string, error) {
+	encodedYAML, err := ioutil.ReadFile(this.path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	encodedJSON, err := yaml.YAMLToJSON(encodedYAML)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	decodedJSON := map[string]interface{}{}
 	if err := json.Unmarshal(encodedJSON, &decodedJSON); err != nil {
-		return err
+		return nil, err
 	}
 
-	tokens, err := this.flatten(decodedJSON, "")
+	settings, err := this.flatten(decodedJSON, "")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	this.tokens = tokens
-	return nil
+	return settings, nil
 }

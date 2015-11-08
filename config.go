@@ -3,36 +3,37 @@ package config
 import (
 	"fmt"
 	"strconv"
-	"sync"
 )
 
 type Config struct {
 	Providers []Provider
-	Loadf     func(*Config) (map[string]string, error)
-	Validatef func(map[string]string) error
-	tokens    map[string]string
+	Validate  func(map[string]string) error
+	settings  map[string]string
 }
 
 func NewConfig(providers []Provider) *Config {
 	return &Config{
 		Providers: providers,
-		Loadf:     LoadDefault,
-		tokens:    map[string]string{},
+		settings:  map[string]string{},
 	}
 }
 
 func (this *Config) Load() error {
-	if this.Loadf != nil {
-		tokens, err := this.Loadf(this)
+	this.settings = map[string]string{}
+
+	for _, provider := range this.Providers {
+		settings, err := provider.Load()
 		if err != nil {
 			return err
 		}
 
-		this.tokens = tokens
+		for key, val := range settings {
+			this.settings[key] = val
+		}
 	}
 
-	if this.Validatef != nil {
-		if err := this.Validatef(this.tokens); err != nil {
+	if this.Validate != nil {
+		if err := this.Validate(this.settings); err != nil {
 			return err
 		}
 	}
@@ -45,7 +46,7 @@ func (this *Config) lookup(key string) (string, error) {
 		return "", err
 	}
 
-	if val, ok := this.tokens[key]; ok {
+	if val, ok := this.settings[key]; ok {
 		return val, nil
 	}
 
@@ -65,6 +66,19 @@ func (this *Config) String(key string) (string, error) {
 	return val, nil
 }
 
+func (this *Config) StringOr(key, alt string) (string, error) {
+	val, err := this.lookup(key)
+	if err != nil {
+		return "", err
+	}
+
+	if val == "" {
+		return alt, nil
+	}
+
+	return val, nil
+}
+
 func (this *Config) Int(key string) (int, error) {
 	val, err := this.lookup(key)
 	if err != nil {
@@ -76,6 +90,45 @@ func (this *Config) Int(key string) (int, error) {
 	}
 
 	return strconv.Atoi(val)
+}
+
+func (this *Config) IntOr(key string, alt int) (int, error) {
+	val, err := this.lookup(key)
+	if err != nil {
+		return 0, err
+	}
+
+	if val == "" {
+		return alt, nil
+	}
+
+	return strconv.Atoi(val)
+}
+
+func (this *Config) Float(key string) (float64, error) {
+	val, err := this.lookup(key)
+	if err != nil {
+		return 0, err
+	}
+
+	if val == "" {
+		return 0, fmt.Errorf("Required token '%s' not set", key)
+	}
+
+	return strconv.ParseFloat(val, 64)
+}
+
+func (this *Config) FloatOr(key string, alt float64) (float64, error) {
+	val, err := this.lookup(key)
+	if err != nil {
+		return 0, err
+	}
+
+	if val == "" {
+		return alt, nil
+	}
+
+	return strconv.ParseFloat(val, 64)
 }
 
 func (this *Config) Bool(key string) (bool, error) {
@@ -91,37 +144,23 @@ func (this *Config) Bool(key string) (bool, error) {
 	return strconv.ParseBool(val)
 }
 
-func (this *Config) GetTokens() map[string]string {
-	return this.tokens
-}
-
-func LoadDefault(c *Config) (map[string]string, error) {
-	tokens := map[string]string{}
-
-	for _, provider := range c.Providers {
-		if err := provider.Load(); err != nil {
-			return nil, err
-		}
-
-		for key, val := range provider.GetTokens() {
-			tokens[key] = val
-		}
+func (this *Config) BoolOr(key string, alt bool) (bool, error) {
+	val, err := this.lookup(key)
+	if err != nil {
+		return false, err
 	}
 
-	return tokens, nil
+	if val == "" {
+		return alt, nil
+	}
+
+	return strconv.ParseBool(val)
 }
 
-var once sync.Once
+func (this *Config) Settings() (map[string]string, error) {
+	if err := this.Load(); err != nil {
+		return nil, err
+	}
 
-func LoadOnce(c *Config) (map[string]string, error) {
-	var err error
-	var tokens = c.GetTokens()
-
-	once.Do(
-		func() {
-			tokens, err = LoadDefault(c)
-		},
-	)
-
-	return tokens, err
+	return this.settings, nil
 }

@@ -7,31 +7,29 @@ import (
 )
 
 type INIFile struct {
-	*FileProvider
+	path string
 }
 
 func NewINIFile(path string) *INIFile {
 	return &INIFile{
-		FileProvider: NewFileProvider(path),
+		path: path,
 	}
 }
 
-func (this *INIFile) Load() error {
-	file, err := ini.Load(this.Path)
+func (this *INIFile) Load() (map[string]string, error) {
+	settings := map[string]string{}
+
+	file, err := ini.Load(this.path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, section := range file.Sections() {
 		for _, key := range section.Keys() {
 			token := fmt.Sprintf("%s.%s", section.Name(), key.Name())
-			this.tokens[strings.ToLower(token)] = key.String()
+			settings[strings.ToLower(token)] = key.String()
 		}
 	}
 
-	return nil
-}
-
-func (this *INIFile) GetTokens() map[string]string {
-	return this.tokens
+	return settings, nil
 }

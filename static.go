@@ -1,19 +1,15 @@
 package config
 
 type Static struct {
-	Tokens map[string]string
+	settings map[string]string
 }
 
-func NewStatic(tokens map[string]string) *Static {
+func NewStatic(settings map[string]string) *Static {
 	return &Static{
-		Tokens: tokens,
+		settings: settings,
 	}
 }
 
-func (this *Static) Load() error {
-	return nil
-}
-
-func (this *Static) GetTokens() map[string]string {
-	return this.Tokens
+func (this *Static) Load() (map[string]string, error) {
+	return this.settings, nil
 }
