@@ -51,7 +51,7 @@ Althought it isn't required, it is a good idea to call the `Load()` function on 
 ```
 Calling the `Load()` function is not required. Each time a setting is requested, the `Load()` function is called first. If you are concerned about performance of calling `Load()` so frequently, see the [Advanced](#Advanced) section.  
 
-The `Config` object can be used to lookup settings from your providers. When performing a lookup on a setting, the key is a period-delimited string. For `ini` files, this means lookups are performed with `<section>.<item>` keys. For example, the settings in `config.json` can be looked up 
+The `Config` object can be used to lookup settings from your providers. When performing a lookup on a setting, the key is a period-delimited string. For `ini` files, this means lookups are performed with `<section>.<item>` keys. For example, the settings in `config.json` can be looked up with the following keys:
 ```
     timeout, err := c.Int("global.timeout")
     ...
@@ -133,13 +133,13 @@ Since we have two providers, we add both of them to the `Config` object. The pos
 
 # Advanced
 
-## Static Defaults
+## Defaults
 Managing default values for settings can be accomplished multiple ways:
-* A configuration file containg all of the defaults
-* Using "Or" functions (e.g. `StringOr()`, `IntOr()`) 
+* A configuration file that contains all of the defaults
+* Using `Or` functions with defaults (e.g. `StringOr(...)`, `IntOr(...)`, etc.)
 * Using the `Static` provider
 
-The `Static` provider takes key value mappings for settings and simply returns those values when `Load()` is called. This is a nice pattern as it doesn't require additional configuration files and it places all defaults into a single place. Make sure to set your defaults as the first provider in your application so they can be overridden by other providers:
+The `Static` provider takes key value mappings for settings and simply returns those values when `Load()` is called. This is a nice pattern as it doesn't require additional configuration files and it places all defaults into a single place in your code. Make sure to set your defaults as the first provider in your application so they can be overridden by other providers:
 ```
     mappings := map[string]string{
         "global.timeout": "30",
@@ -168,15 +168,32 @@ Using the [Multiple Providers Example](#Multiple_Providers_Example) above, we wi
     c := config.NewConfig(providers)
 ```
 
+An example using the `CachedLoader` instead of `OnceLoader`:
+```
+    env := config.NewEnvironment(...)
+    iniFile := config.NewINIFile("config.ini")
+    iniFileCached := config.NewCachedLoader(iniFile)
+    
+    providers := []config.Provider{iniFileCached, env}
+    c := config.NewConfig(providers)
+    ...
+    // will force iniFileCached to load next time a lookup is performed
+    c.Invalidate()
+    v, err := c.String("global.timeout")
+    ...
+```
+
+
 ## Custom Providers
 Custom providers must fulfill the `Provider` interface:
 ```
     type Provider interface {
         Load() (map[string]string, error)
-    }f
+    }
 ```
 
-The `Load()` function returns settings as key/value pairs. Providers flatten namespaces using period-delimited strings. For example::
+The `Load()` function returns settings as key/value pairs. Providers flatten namespaces using period-delimited strings. 
+For example, the following providers and content:
 
 INI File:
 ```
@@ -199,5 +216,7 @@ JSON File:
 ```
 
 All resolve the `global.timeout` setting to `30`. 
+This is allows providers to override and lookup settings using a command key format. 
+
 
 
