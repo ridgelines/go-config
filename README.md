@@ -181,12 +181,12 @@ use the `OnceLoader` for the `iniFile` provider and keep the default behavior fo
 ```
     env := config.NewEnvironment(...)
     iniFile := config.NewINIFile("config.ini")
-    iniFileOnce := config.NewOnceLoader(iniFile)
+    iniFileLoader := config.NewOnceLoader(iniFile)
     
-    providers := []config.Provider{iniFileOnce, env}
+    providers := []config.Provider{iniFileLoader, env}
     c := config.NewConfig(providers)
 ```
-The first time a lookup is performed (e.g. `c.String("global.timeout")`), the provider's `Load()` function will be called. 
+The first time a lookup is performed, the provider's `Load()` function will be called. 
 All other calls will use the same settings as the original lookup.  
 
 The `CachedLoader` behaves in a similar manner except that it contains an `Invalidate()` function. 
@@ -194,14 +194,14 @@ After `Invalidate()` is called, the provider's `Load()` function will be execute
 ```
     env := config.NewEnvironment(...)
     iniFile := config.NewINIFile("config.ini")
-    iniFileCached := config.NewCachedLoader(iniFile)
+    iniFileLoader := config.NewCachedLoader(iniFile)
     
-    providers := []config.Provider{iniFileCached, env}
+    providers := []config.Provider{iniFileLoader, env}
     c := config.NewConfig(providers)
+
     ...
-    // will force iniFileCached to load next time a lookup is performed
-    iniFileCached.Invalidate()
-    v, err := c.String("global.timeout")
+    // will execute iniFile.Load() next time a lookup is performed
+    iniFileLoader.Invalidate()
     ...
 ```
 
@@ -233,13 +233,13 @@ For example, wrap the `json` provider in a `Resolver` in order to resolve `items
         "items.server.timeout": "server.timeout",
     }
 
-    resolverJSONFile := config.NewResolver(jsonFile, mappings)
+    JSONFileResolver := config.NewResolver(jsonFile, mappings)
 
-    providers := []config.Provider{iniFile, jsonFile}
+    providers := []config.Provider{iniFile, jsonFileResolver}
     c := config.NewConfig(providers)
 ```
 
-The canonical key for the setting is now: `server.timeout`
+The canonical key for the setting is now `server.timeout`
 
 ## Custom Providers
 Custom providers must fulfill the `Provider` interface:
