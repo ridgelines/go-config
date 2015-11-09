@@ -178,7 +178,7 @@ An example using the `CachedLoader` instead of `OnceLoader`:
     c := config.NewConfig(providers)
     ...
     // will force iniFileCached to load next time a lookup is performed
-    c.Invalidate()
+    iniFileCached.Invalidate()
     v, err := c.String("global.timeout")
     ...
 ```
@@ -206,12 +206,16 @@ are actually intended to reference the same setting.
 You can use a `Resolver` to change the mappings in a provider. 
 For example, wrap the `json` provider in a `Resolver` in order to resolve `items.server.timeout` as `server.timeout`:
 ```
+    iniFile := config.NewINIFile("config.ini")
     jsonFile := config.NewJSONFile("config.json")
     mappings := map[string]string{
         "items.server.timeout": "server.timeout",
     }
 
     resolverJSONFile := config.NewResolver(jsonFile, mappings)
+
+    providers := []config.Provider{iniFile, jsonFile}
+    c := config.NewConfig(providers)
 ```
 
 You can now use `server.timeout` as the canonical key for the setting. 
@@ -248,7 +252,7 @@ JSON File:
 ```
 
 All resolve the `global.timeout` setting to `30`. 
-This is allows providers to override and lookup settings using a command key format. 
+This is allows providers to override and lookup settings using a common key. 
 
 
 # License
