@@ -33,25 +33,32 @@ time_zone=PST
 enabled=true
 ```
 First, create a **Provider** that will be responsible for loading configuration values from the `config.ini` file.
-Since `config.ini` is in  [INI](https://code.google.com/p/minini/wiki/INI_File_Syntax) format, use the `INIFile` provider:
+Since `config.ini` is in `ini` format, use the `INIFile` provider:
 ```
     iniFile := config.NewINIFile("config.ini")
 ```
 
-Next, create a **Config** object to manage the application's providers. Since this application only has one provider, `iniFile`, we pass a list with only one object into the constructor. 
+Next, create a **Config** object to manage the application's providers. 
+Since this application only has one provider, `iniFile`, pass a list with only one object into the constructor. 
 ```
     c := config.NewConfig([]config.Provider{iniFile})
 ```
 
-Althought it isn't required, it is a good idea to call the `Load()` function on your config object after creating it. This will notify you if there was an error loading the providers.
+It is a good idea to call the `Load()` function on your config object after creating it. 
 ```
     if err := c.Load(); err != nil{
         log.Fatal(err)
     }
 ```
-Calling the `Load()` function is not required. Each time a setting is requested, the `Load()` function is called first. If you are concerned about performance of calling `Load()` so frequently, see the [Advanced](#Advanced) section.  
 
-The `Config` object can be used to lookup settings from your providers. When performing a lookup on a setting, the key is a period-delimited string. For `ini` files, this means lookups are performed with `<section>.<item>` keys. For example, the settings in `config.json` can be looked up with the following keys:
+However, calling the `Load()` function is not required. 
+Each time a setting is requested, the `Load()` function is called first. 
+If you are concerned about performance of calling `Load()` so frequently, see the [Advanced](#advanced) section.  
+
+The `Config` object can be used to lookup settings from your providers. 
+When performing a lookup on a setting, the key is a period-delimited string. 
+For `ini` files, this means lookups are performed with `<section>.<item>` keys. 
+For example, the settings in `config.json` can be looked up with the following keys:
 ```
     timeout, err := c.Int("global.timeout")
     ...
@@ -62,10 +69,12 @@ The `Config` object can be used to lookup settings from your providers. When per
     enabled, err := c.Bool("local.enabled")
     ...
 ```
-All of the settings in your application are stored as strings. As shown above, the `Config` object has convenience functions for type conversions: `Int(), Float(), Bool()`. 
+All of the settings in your application are stored as strings. 
+As shown above, the `Config` object has convenience functions for type conversions: `Int(), Float(), Bool()`. 
 
 ## Validation
-The `Config` object has an optional `Validate` function that is called after the settings are loaded from the providers. Taking the `config.ini` example from above, we can create a `Validate` function that makes sure the `global.timeout` setting exists: 
+The `Config` object has an optional `Validate` function that is called after the settings are loaded from the providers. 
+Taking the `config.ini` example from above, create a `Validate` function that makes sure the `global.timeout` setting exists: 
 ```
    iniFile := config.NewINIFile("config.ini")
    c := config.NewConfig([]config.Provider{iniFile})
@@ -106,15 +115,17 @@ All of the setting can be retrieved using the `Settings()` function:
 
 ## Multiple Providers Example
 Many applications have more than one means of configuration. 
-Building off of the [Single Provider Example](#Single_Provider_Example) above, we will add environment variables as a means of configuration in addition to the `config.ini` file. We will let environment variables override settings in `config.go`. 
+Building off of the [Single Provider Example](#single-provider-example) above, this example will add environment variables as a means of configuration in addition to the `config.ini` file.
+If they are set, the environment variables will override settings in `config.go`. 
 
-As before, create a Provider that will be responsible for loading configuration values from the `config.ini` file:
+As before, create a provider that will be responsible for loading configuration values from the `config.ini` file:
 ```
     iniFile := config.NewINIFile("config.ini")
 ```
 
-Next, create an `Environment` provider that will be responsible for loading configuration values fron environment variables. The `Environment` provider takes a map that associates setting keys with environment variables.
-Since we want the environment variables to override the same settings in `config.ini`, construct the map like so:
+Next, create an `Environment` provider that will be responsible for loading configuration values from environment variables. 
+The `Environment` provider takes a map that associates setting keys with environment variables.
+Since the environment variables should override the same settings keys as `config.ini`, construct the map like so:
 ```
     mappings := map[string]string{
         "global.timeout": "APP_TIMEOUT",
@@ -125,7 +136,9 @@ Since we want the environment variables to override the same settings in `config
     
     env := config.NewEnvironment(mappings)
 ```
-Since we have two providers, we add both of them to the `Config` object. The position of the provider in the list determines the ordering of settings lookups. Since we want environment variables to override the values in `config.ini`, we put the `Environment` provider later in the list:
+Since there are two providers, add both of them to the `Config` object. 
+The position of the provider in the list determines the ordering of settings lookups. 
+Since environment variables should override the values in `config.ini`, put the `Environment` provider later in the list:
 ```
     providers := []config.Providers{iniFile, env}
     c := config.NewConfig(providers)
@@ -139,7 +152,9 @@ Managing default values for settings can be accomplished multiple ways:
 * Using `Or` functions with defaults (e.g. `StringOr(...)`, `IntOr(...)`, etc.)
 * Using the `Static` provider
 
-The `Static` provider takes key value mappings for settings and simply returns those values when `Load()` is called. This is a nice pattern as it doesn't require additional configuration files and it places all defaults into a single place in your code. Make sure to set your defaults as the first provider in your application so they can be overridden by other providers:
+The `Static` provider takes key value mappings for settings and simply returns those values when `Load()` is called. 
+This is a nice pattern as it doesn't require additional configuration files and it places all defaults into a single place in your code. 
+Make sure to set your defaults as the first provider in your application so they can be overridden by other providers:
 ```
     mappings := map[string]string{
         "global.timeout": "30",
@@ -154,11 +169,15 @@ The `Static` provider takes key value mappings for settings and simply returns t
 ```
 
 ## Loading Patterns
-Each time a lookup is performed, the `Load()` function is called on each provider. This can lead to poor performance and be unecessary for certain providers. There are two built in objects which change how frequently loads are performed:
+Each time a lookup is performed, the `Load()` function is called on each provider. 
+This can lead to poor performance and be unecessary for certain providers. 
+There are two built in objects which change how frequently loads are performed:
 * `OnceLoader` - Loads the provider's settings one time
-* `CachedLoader` - Loads the provider's settings at least one time and caches the results. The `Invalidate()` function can be called to force a new load next time a lookup is performed.
+* `CachedLoader` - Loads the provider's settings at least one time and caches the results. 
+The `Invalidate()` function can be called to force a new load next time a lookup is performed.
 
-Using the [Multiple Providers Example](#Multiple_Providers_Example) above, we will use the `OnceLoader` for the `iniFile` provider and keep the default behavior for the `Environment` provider (perform a load each time a lookup is requested):
+Building off of the [Multiple Providers Example](#multiple-providers-example) above, 
+use the `OnceLoader` for the `iniFile` provider and keep the default behavior for the `Environment` provider (perform a load each time a lookup is requested):
 ```
     env := config.NewEnvironment(...)
     iniFile := config.NewINIFile("config.ini")
@@ -167,8 +186,11 @@ Using the [Multiple Providers Example](#Multiple_Providers_Example) above, we wi
     providers := []config.Provider{iniFileOnce, env}
     c := config.NewConfig(providers)
 ```
+The first time a lookup is performed (e.g. `c.String("global.timeout")`), the provider's `Load()` function will be called. 
+All other calls will use the same settings as the original lookup.  
 
-An example using the `CachedLoader` instead of `OnceLoader`:
+The `CachedLoader` behaves in a similar manner except that it contains an `Invalidate()` function. 
+After `Invalidate()` is called, the provider's `Load()` function will be executed the next time a lookup is performed.
 ```
     env := config.NewEnvironment(...)
     iniFile := config.NewINIFile("config.ini")
@@ -201,9 +223,8 @@ And another file `config.ini` contained:
 timeout=30
 ```
 
-The `timeout` setting would have the key `items.server.timeout` for the `json` file and `server.timeout` for the `ini` file when they
-are actually intended to reference the same setting. 
-You can use a `Resolver` to change the mappings in a provider. 
+The `timeout` setting would have the key `items.server.timeout` for the `json` file and `server.timeout` for the `ini` file when they are actually intended to reference the same setting. 
+A `Resolver` can be used to change the mappings in a provider. 
 For example, wrap the `json` provider in a `Resolver` in order to resolve `items.server.timeout` as `server.timeout`:
 ```
     iniFile := config.NewINIFile("config.ini")
@@ -218,7 +239,7 @@ For example, wrap the `json` provider in a `Resolver` in order to resolve `items
     c := config.NewConfig(providers)
 ```
 
-You can now use `server.timeout` as the canonical key for the setting. 
+The canonical key for the setting is now: `server.timeout`
 
 ## Custom Providers
 Custom providers must fulfill the `Provider` interface:
@@ -228,7 +249,8 @@ Custom providers must fulfill the `Provider` interface:
     }
 ```
 
-The `Load()` function returns settings as key/value pairs. Providers flatten namespaces using period-delimited strings. 
+The `Load()` function returns settings as key/value pairs. 
+Providers flatten namespaces using period-delimited strings. 
 For example, the following providers and content:
 
 INI File:
