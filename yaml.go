@@ -7,12 +7,12 @@ import (
 )
 
 type YAMLFile struct {
-	*JSONFile
+	path string 
 }
 
 func NewYAMLFile(path string) *YAMLFile {
 	return &YAMLFile{
-		JSONFile: NewJSONFile(path),
+		path: path,
 	}
 }
 
@@ -32,10 +32,5 @@ func (this *YAMLFile) Load() (map[string]string, error) {
 		return nil, err
 	}
 
-	settings, err := this.flatten(decodedJSON, "")
-	if err != nil {
-		return nil, err
-	}
-
-	return settings, nil
+	return FlattenJSON(decodedJSON, "")
 }
