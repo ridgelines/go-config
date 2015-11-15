@@ -27,7 +27,7 @@ func (this *JSONFile) Load() (map[string]string, error) {
 		return nil, err
 	}
 
-	settings, err := this.flatten(decodedJSON, "")
+	settings, err := FlatJSON(decodedJSON, "")
 	if err != nil {
 		return nil, err
 	}
@@ -62,4 +62,28 @@ func (this *JSONFile) flatten(inputJSON map[string]interface{}, namespace string
 	}
 
 	return flattened, nil
+}
+
+//FlatJSON convert the input into map[string]string and adds namespace.
+func FlatJSON(input map[string]interface{}, namespace string) (map[string]string, error) {
+	out := make(map[string]string)
+	for k, v := range input {
+		if namespace != "" {
+			k = fmt.Sprintf("%s.%s", namespace, k)
+		}
+		switch v.(type) {
+		case map[string]interface{}:
+			val, err := FlatJSON(v.(map[string]interface{}), k)
+			if err != nil {
+				return nil, err
+			}
+
+			for cKey, cVal := range val {
+				out[cKey] = cVal
+			}
+		default:
+			out[k] = fmt.Sprintf("%v", v)
+		}
+	}
+	return out, nil
 }
