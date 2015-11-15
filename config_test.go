@@ -28,7 +28,7 @@ func TestPrecedence(t *testing.T) {
 	}
 
 	if without == true {
-		t.Errorf("Setting 'without_override' was true, excpected false")
+		t.Errorf("Setting 'without_override' was true, expected false")
 	}
 
 	with, err := c.Bool("with_override")
@@ -37,7 +37,7 @@ func TestPrecedence(t *testing.T) {
 	}
 
 	if with == false {
-		t.Errorf("Setting 'with_override' was 'false', excpected 'true'")
+		t.Errorf("Setting 'with_override' was 'false', expected 'true'")
 	}
 }
 
@@ -57,7 +57,7 @@ func TestTypeLookups(t *testing.T) {
 	}
 
 	if s != "some_string" {
-		t.Errorf("String setting was '%s', excpected 'some_string'", s)
+		t.Errorf("String setting was '%s', expected 'some_string'", s)
 	}
 
 	b, err := c.Bool("bool")
@@ -66,7 +66,7 @@ func TestTypeLookups(t *testing.T) {
 	}
 
 	if b != true {
-		t.Errorf("Bool setting was 'false', excpected 'true'")
+		t.Errorf("Bool setting was 'false', expected 'true'")
 	}
 
 	i, err := c.Int("int")
@@ -75,7 +75,7 @@ func TestTypeLookups(t *testing.T) {
 	}
 
 	if i != 1 {
-		t.Errorf("Int setting was '%d', excpected '1'", i)
+		t.Errorf("Int setting was '%d', expected '1'", i)
 	}
 
 	f, err := c.Float("float")
@@ -84,7 +84,7 @@ func TestTypeLookups(t *testing.T) {
 	}
 
 	if f != 1.5 {
-		t.Errorf("Float setting was '%f', excpected '1.5'", f)
+		t.Errorf("Float setting was '%f', expected '1.5'", f)
 	}
 }
 
@@ -97,7 +97,7 @@ func TestTypeOrLookups(t *testing.T) {
 	}
 
 	if s != "some_string" {
-		t.Errorf("String setting was '%s', excpected 'some_string'", s)
+		t.Errorf("String setting was '%s', expected 'some_string'", s)
 	}
 
 	b, err := c.BoolOr("bool", true)
@@ -106,7 +106,7 @@ func TestTypeOrLookups(t *testing.T) {
 	}
 
 	if b != true {
-		t.Errorf("Bool setting was 'false', excpected 'true'")
+		t.Errorf("Bool setting was 'false', expected 'true'")
 	}
 
 	i, err := c.IntOr("int", 1)
@@ -115,7 +115,7 @@ func TestTypeOrLookups(t *testing.T) {
 	}
 
 	if i != 1 {
-		t.Errorf("Int setting was '%d', excpected '1'", i)
+		t.Errorf("Int setting was '%d', expected '1'", i)
 	}
 
 	f, err := c.FloatOr("float", 1.5)
@@ -124,7 +124,7 @@ func TestTypeOrLookups(t *testing.T) {
 	}
 
 	if f != 1.5 {
-		t.Errorf("Float setting was '%f', excpected '1.5'", f)
+		t.Errorf("Float setting was '%f', expected '1.5'", f)
 	}
 }
 
