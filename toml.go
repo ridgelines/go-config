@@ -2,7 +2,6 @@ package config
 
 import (
 	"io/ioutil"
-
 	"github.com/BurntSushi/toml"
 )
 
@@ -16,15 +15,16 @@ func NewTOMLFile(path string) *TOMLFile {
 	}
 }
 
-func (t *TOMLFile) Load() (map[string]string, error) {
-	data, err := ioutil.ReadFile(t.path)
+func (this *TOMLFile) Load() (map[string]string, error) {
+	data, err := ioutil.ReadFile(this.path)
 	if err != nil {
 		return nil, err
 	}
+
 	out := make(map[string]interface{})
-	_, terr := toml.Decode(string(data), &out)
-	if terr != nil {
-		return nil, terr
+	if _, err := toml.Decode(string(data), &out); err != nil{
+		return nil, err
 	}
-	return FlatJSON(out, "")
+
+	return FlattenJSON(out, "")
 }
