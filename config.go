@@ -60,7 +60,7 @@ func (this *Config) String(key string) (string, error) {
 	}
 
 	if val == "" {
-		return "", fmt.Errorf("Required token '%s' not set", key)
+		return "", fmt.Errorf("Required setting '%s' not set", key)
 	}
 
 	return val, nil
@@ -86,7 +86,7 @@ func (this *Config) Int(key string) (int, error) {
 	}
 
 	if val == "" {
-		return 0, fmt.Errorf("Required token '%s' not set", key)
+		return 0, fmt.Errorf("Required setting '%s' not set", key)
 	}
 
 	return strconv.Atoi(val)
@@ -112,7 +112,7 @@ func (this *Config) Float(key string) (float64, error) {
 	}
 
 	if val == "" {
-		return 0, fmt.Errorf("Required token '%s' not set", key)
+		return 0, fmt.Errorf("Required setting '%s' not set", key)
 	}
 
 	return strconv.ParseFloat(val, 64)
@@ -138,7 +138,7 @@ func (this *Config) Bool(key string) (bool, error) {
 	}
 
 	if val == "" {
-		return false, fmt.Errorf("Required token '%s' not set", key)
+		return false, fmt.Errorf("Required setting '%s' not set", key)
 	}
 
 	return strconv.ParseBool(val)

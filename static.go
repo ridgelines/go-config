@@ -11,5 +11,15 @@ func NewStatic(settings map[string]string) *Static {
 }
 
 func (this *Static) Load() (map[string]string, error) {
-	return this.settings, nil
+	settings := map[string]string{}
+
+	for key, value := range this.settings {
+		settings[key] = value
+	}
+
+	return settings, nil
+}
+
+func (this *Static) Set(key, val string) {
+	this.settings[key] = val
 }

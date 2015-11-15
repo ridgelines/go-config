@@ -17,6 +17,7 @@ The `go-config` package has three main components: **providers**, **settings**, 
 * `INIFile` - Loads settings from a `.ini` file
 * `JSONFile`  - Loads settings from a `.json` file
 * `YAMLFile` - Loads settings from a `.yaml` file
+* `CLI` - Loads settings from a [codegansta/cli](https://github.com/codegangsta/cli) context
 * `Environment` - Loads settings from environment variables 
 * `Static` - Loads settings from an in-memory map
 
@@ -128,10 +129,10 @@ The `Environment` provider takes a map that associates setting keys with environ
 Since the environment variables should override the same settings keys as `config.ini`, construct the map like so:
 ```
     mappings := map[string]string{
-        "global.timeout": "APP_TIMEOUT",
-        "globabl.frequency": "APP_FREQUENCY",
-        "local.time_zone": "APP_TIMEZONE",
-        "local.enabled": "APP_ENABLED",
+        "APP_TIMEOUT": "global.timeout",
+        "APP_FREQUENCY": "global.frequency",
+        "APP_TIMEZONE": "local.time_zone",
+        "APP_ENABLED": "local.enabled",
     }
     
     env := config.NewEnvironment(mappings)
@@ -142,6 +143,124 @@ Since environment variables should override the values in `config.ini`, put the 
 ```
     providers := []config.Providers{iniFile, env}
     c := config.NewConfig(providers)
+```
+
+## CLI Provider Example
+In addition to files and environment variables, applications tend to use command line arguments for configuration.
+One of the most popular command line tool for golang is [Jeremy Saenz's CLI](https://github.com/codegangsta/cli).
+This tool does an excellent job of allowing users to configure their applications using 
+[flags](https://github.com/codegangsta/cli#flags) and [environment variables](https://github.com/codegangsta/cli#values-from-the-environment).
+This works great for many applications, but can easily become messy when settings need to be loaded from other sources.
+The `CLI` provider aims to make configuration management from any number of providers as simple as possible.
+
+
+For the following example, assume the application includes a configuration file, `config.yaml`, and `main.go` with the following content:
+
+### Config.yaml
+```
+message: "Hello from config.yaml"
+silent: false
+```
+
+### Main.go
+```
+package main 
+
+import (
+    "github.com/codegangsta/cli"
+    "github.com/zpatrick/go-config"
+    "log"
+    "os"
+)
+
+func initConfig() *config.Config {
+    yamlFile := config.NewYAMLFile("config.yaml")
+    return config.NewConfig([]config.Provider{yamlFile})
+}
+
+func main() {
+    conf := initConfig()
+
+    app := cli.NewApp()
+    app.Flags = []cli.Flag{
+        cli.StringFlag{
+            Name:  "message",
+            Value: "Hello from main.go",
+            Usage: "Message to print",
+        },
+        cli.BoolFlag{
+            Name: "silent",
+            Usage: "Don't print the message",
+        },
+    }
+
+    app.Action = func(c *cli.Context) {
+        conf.Providers = append(conf.Providers, config.NewCLI(c, false))
+
+        message, err := conf.String("message")
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        silent, err := conf.Bool("silent")
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        if !silent {
+            log.Println(message)
+        }
+    }
+
+    app.Run(os.Args)
+}
+```
+
+### Creating the YAML Provider
+The following lines create the `YAML` provider and the `Config` object
+```
+yamlFile := config.NewYAMLFile("config.yaml")
+return config.NewConfig([]config.Provider{yamlFile})
+```
+Since this application uses `config.yaml` for configuration, the `YAMLFile` is used to load settings from that file.
+This will load the settings `message="Hello from config.yaml"` and `silence=false`.
+
+### Creating the CLI Provider
+In the `app.Action` function, a new `CLI` provider is created to load settings. The `CLI` provider takes a `*cli.Context` and boolean argument `useDefaults`. Having default values for flags is useful, but unlike other flags, boolean flags always have a default value. Since this could lead to unwanted or unexpected behavior, users must specify which setting to use:
+* If `useDefaults=true`, flags with default values will be loaded.
+In context of this example, the `CLI` provider will load the settings `message="Hello from main.go"` and `silent=false` when the user runs the application without any arguments. 
+These settings would overwrite the `message` and `silent` settings loaded from `config.yaml`.
+* If `useDefaults=false`, only flags that have been set via the command line will be loaded as settings.
+In context of this example, the `CLI` provider will not load any settings when the user runs the application without any arguments.
+This allows the setting loaded by `config.yaml` to not be overwitten.
+
+The following line creates the `CLI` provider and appends it to the existing providers:
+```
+conf.Providers = append(conf.Providers, config.NewCLI(c, false))
+```
+Note that `useDefaults=false`. This way, settings in `config.yaml` aren't overridden by the default flag values.
+
+### Running the Application
+**No Arguments**: The `message` and `silent` settings from `config.yaml` are used
+```
+> go run main.go
+Hello from config.yaml
+```
+**Message Flag**: The `message` setting from the `CLI` provider is used. The `silent` setting from `config.yaml` is used
+```
+> go run main.go --message "Hello from the command line"
+Hello from the command line
+```
+**Silent Flag**: The `message` and `silent` settings from the `CLI` provider are used
+```
+> go run main.go --message "this shouldn't print" --silent
+<no output>
+```
+
+**No Arguments with `useDefaults=True`**: To further demonstrate the different behavior of `useDefault`, here is the output with no argument when `useDefault=true`. The default `message` and `silent` settings from the `CLI` are used:
+```
+> go run main.go
+Hello from main.go
 ```
 
 # Advanced
@@ -274,7 +393,7 @@ JSON File:
 ```
 
 All resolve the `global.timeout` setting to `30`. 
-This is allows providers to override and lookup settings using a common key. 
+This is allows providers to override and lookup settings using a canonical key. 
 
 
 # License

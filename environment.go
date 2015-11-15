@@ -17,9 +17,9 @@ func NewEnvironment(mappings map[string]string) *Environment {
 func (this *Environment) Load() (map[string]string, error) {
 	settings := map[string]string{}
 
-	for token, env := range this.mappings {
+	for env, key := range this.mappings {
 		if val := os.Getenv(env); val != "" {
-			settings[token] = val
+			settings[key] = val
 		}
 	}
 

@@ -1,0 +1,10 @@
+{
+	"global": {
+		"timeout": 30,
+		"frequency": 0.5
+	},
+	"local": {
+		"time_zone": "PST",
+		"enabled": true
+	}
+}
