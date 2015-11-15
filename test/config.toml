@@ -1,0 +1,7 @@
+[global]
+  frequency = 0.5
+  timeout = 30
+
+[local]
+  enabled = true
+  time_zone = "PST"
