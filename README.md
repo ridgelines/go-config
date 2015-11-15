@@ -223,7 +223,7 @@ yamlFile := config.NewYAMLFile("config.yaml")
 return config.NewConfig([]config.Provider{yamlFile})
 ```
 Since this application uses `config.yaml` for configuration, the `YAMLFile` is used to load settings from that file.
-This will load the settings `message="Hello from config.yaml"` and `silence=false`.
+This will load the settings `message="Hello from config.yaml"` and `silent=false`.
 
 ### Creating the CLI Provider
 In the `app.Action` function, a new `CLI` provider is created to load settings. The `CLI` provider takes a `*cli.Context` and boolean argument `useDefaults`. Having default values for flags is useful, but unlike other flags, boolean flags always have a default value. Since this could lead to unwanted or unexpected behavior, users must specify which setting to use:
@@ -238,7 +238,7 @@ The following line creates the `CLI` provider and appends it to the existing pro
 ```
 conf.Providers = append(conf.Providers, config.NewCLI(c, false))
 ```
-Note that `useDefaults=false`. This way, settings in `config.yaml` aren't overridden by the default flag values.
+Note that `useDefaults=false`. This way, settings in `config.yaml` aren't overwitten by the default flag values.
 
 ### Running the Application
 **No Arguments**: The `message` and `silent` settings from `config.yaml` are used
@@ -251,13 +251,13 @@ Hello from config.yaml
 > go run main.go --message "Hello from the command line"
 Hello from the command line
 ```
-**Silent Flag**: The `message` and `silent` settings from the `CLI` provider are used
+**Silent and Message Flag**: The `message` and `silent` settings from the `CLI` provider are used
 ```
 > go run main.go --message "this shouldn't print" --silent
 <no output>
 ```
 
-**No Arguments with `useDefaults=True`**: To further demonstrate the different behavior of `useDefault`, here is the output with no argument when `useDefault=true`. The default `message` and `silent` settings from the `CLI` are used:
+**No Arguments with `useDefaults=True`**: To further demonstrate the different behavior of `useDefault`, here is the output when `useDefault=true`. The default `message` and `silent` settings from the `CLI` are used:
 ```
 > go run main.go
 Hello from main.go
