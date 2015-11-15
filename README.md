@@ -17,6 +17,7 @@ The `go-config` package has three main components: **providers**, **settings**, 
 * `INIFile` - Loads settings from a `.ini` file
 * `JSONFile`  - Loads settings from a `.json` file
 * `YAMLFile` - Loads settings from a `.yaml` file
+* `TOMLFile` - Loads settings from a `.toml` file
 * `CLI` - Loads settings from a [codegansta/cli](https://github.com/codegangsta/cli) context
 * `Environment` - Loads settings from environment variables 
 * `Static` - Loads settings from an in-memory map

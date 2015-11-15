@@ -66,7 +66,7 @@ func TestCLILoad(t *testing.T) {
 		},
 	)
 
-	if !executed{
+	if !executed {
 		t.Fail()
 	}
 }
