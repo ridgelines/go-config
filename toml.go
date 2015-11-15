@@ -1,8 +1,8 @@
 package config
 
 import (
-	"io/ioutil"
 	"github.com/BurntSushi/toml"
+	"io/ioutil"
 )
 
 type TOMLFile struct {
@@ -22,7 +22,7 @@ func (this *TOMLFile) Load() (map[string]string, error) {
 	}
 
 	out := make(map[string]interface{})
-	if _, err := toml.Decode(string(data), &out); err != nil{
+	if _, err := toml.Decode(string(data), &out); err != nil {
 		return nil, err
 	}
 

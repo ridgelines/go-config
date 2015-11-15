@@ -7,7 +7,7 @@ import (
 )
 
 type YAMLFile struct {
-	path string 
+	path string
 }
 
 func NewYAMLFile(path string) *YAMLFile {
