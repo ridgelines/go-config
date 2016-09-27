@@ -3,9 +3,11 @@ package config
 import (
 	"fmt"
 	"strconv"
+	"sync"
 )
 
 type Config struct {
+	sync.RWMutex
 	Providers []Provider
 	Validate  func(map[string]string) error
 	settings  map[string]string
@@ -19,8 +21,9 @@ func NewConfig(providers []Provider) *Config {
 }
 
 func (this *Config) Load() error {
+	this.Lock()
+	defer this.Unlock()
 	this.settings = map[string]string{}
-
 	for _, provider := range this.Providers {
 		settings, err := provider.Load()
 		if err != nil {
@@ -45,8 +48,10 @@ func (this *Config) lookup(key string) (string, error) {
 	if err := this.Load(); err != nil {
 		return "", err
 	}
-
-	if val, ok := this.settings[key]; ok {
+	this.Lock()
+	val, ok := this.settings[key]
+	this.Unlock()
+	if ok {
 		return val, nil
 	}
 
