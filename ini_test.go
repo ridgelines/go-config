@@ -17,6 +17,7 @@ func TestINILoad(t *testing.T) {
 		"global.frequency": "0.5",
 		"local.time_zone":  "PST",
 		"local.enabled":    "true",
+		"ABC.def":          "ghi",
 	}
 
 	for key, expected := range expectedSettings {
