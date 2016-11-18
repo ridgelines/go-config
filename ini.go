@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"github.com/go-ini/ini"
-	"strings"
 )
 
 type INIFile struct {
@@ -27,7 +26,7 @@ func (this *INIFile) Load() (map[string]string, error) {
 	for _, section := range file.Sections() {
 		for _, key := range section.Keys() {
 			token := fmt.Sprintf("%s.%s", section.Name(), key.Name())
-			settings[strings.ToLower(token)] = key.String()
+			settings[token] = key.String()
 		}
 	}
 
