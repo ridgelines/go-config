@@ -1,25 +1,13 @@
 package config
 
-type Static struct {
-	settings map[string]string
-}
-
-func NewStatic(settings map[string]string) *Static {
-	return &Static{
-		settings: settings,
+func NewStaticProvider(settings map[string]string) *Provider {
+	return &Provider{
+		Get: StaticGetter(settings),
 	}
 }
 
-func (this *Static) Load() (map[string]string, error) {
-	settings := map[string]string{}
-
-	for key, value := range this.settings {
-		settings[key] = value
+func StaticGetter(settings map[string]string) Getter {
+	return func(key string) (string, error) {
+		return settings[key], nil
 	}
-
-	return settings, nil
-}
-
-func (this *Static) Set(key, val string) {
-	this.settings[key] = val
 }

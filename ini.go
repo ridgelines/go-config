@@ -5,30 +5,27 @@ import (
 	"github.com/go-ini/ini"
 )
 
-type INIFile struct {
-	path string
-}
-
-func NewINIFile(path string) *INIFile {
-	return &INIFile{
-		path: path,
+func NewINIFileProvider(path string) *Provider {
+	return &Provider{
+		Get: INIGetter(path),
 	}
 }
 
-func (this *INIFile) Load() (map[string]string, error) {
-	settings := map[string]string{}
-
-	file, err := ini.Load(this.path)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, section := range file.Sections() {
-		for _, key := range section.Keys() {
-			token := fmt.Sprintf("%s.%s", section.Name(), key.Name())
-			settings[token] = key.String()
+func INIGetter(path string) Getter {
+	return func(key string) (string, error) {
+		decodedINI, err := ini.Load(path)
+		if err != nil {
+			return "", err
 		}
-	}
 
-	return settings, nil
+		settings := map[string]string{}
+		for _, section := range decodedINI.Sections() {
+			for _, key := range section.Keys() {
+				token := fmt.Sprintf("%s.%s", section.Name(), key.Name())
+				settings[token] = key.String()
+			}
+		}
+
+		return settings[key], nil
+	}
 }

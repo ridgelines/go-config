@@ -1,5 +1,7 @@
 package config
 
-type Provider interface {
-	Load() (map[string]string, error)
+type Getter func(string) (string, error)
+type Provider struct {
+	Get Getter
+	// Cache, Translators, middleware, etc.
 }

@@ -6,31 +6,34 @@ import (
 	"io/ioutil"
 )
 
-type YAMLFile struct {
-	path string
-}
-
-func NewYAMLFile(path string) *YAMLFile {
-	return &YAMLFile{
-		path: path,
+func NewYAMLFileProvider(path string) *Provider {
+	return &Provider{
+		Get: YAMLGetter(path),
 	}
 }
 
-func (this *YAMLFile) Load() (map[string]string, error) {
-	encodedYAML, err := ioutil.ReadFile(this.path)
-	if err != nil {
-		return nil, err
-	}
+func YAMLGetter(path string) Getter {
+	return func(key string) (string, error) {
+		encodedYAML, err := ioutil.ReadFile(path)
+		if err != nil {
+			return "", err
+		}
 
-	encodedJSON, err := yaml.YAMLToJSON(encodedYAML)
-	if err != nil {
-		return nil, err
-	}
+		encodedJSON, err := yaml.YAMLToJSON(encodedYAML)
+		if err != nil {
+			return "", err
+		}
 
-	decodedJSON := map[string]interface{}{}
-	if err := json.Unmarshal(encodedJSON, &decodedJSON); err != nil {
-		return nil, err
-	}
+		decodedJSON := map[string]interface{}{}
+		if err := json.Unmarshal(encodedJSON, &decodedJSON); err != nil {
+			return "", err
+		}
 
-	return FlattenJSON(decodedJSON, "")
+		settings, err := flattenJSON(decodedJSON, "")
+		if err != nil {
+			return "", err
+		}
+
+		return settings[key], nil
+	}
 }

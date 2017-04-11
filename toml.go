@@ -5,26 +5,29 @@ import (
 	"io/ioutil"
 )
 
-type TOMLFile struct {
-	path string
-}
-
-func NewTOMLFile(path string) *TOMLFile {
-	return &TOMLFile{
-		path: path,
+func NewTOMLFileProvider(path string) *Provider {
+	return &Provider{
+		Get: TOMLGetter(path),
 	}
 }
 
-func (this *TOMLFile) Load() (map[string]string, error) {
-	data, err := ioutil.ReadFile(this.path)
-	if err != nil {
-		return nil, err
-	}
+func TOMLGetter(path string) Getter {
+	return func(key string) (string, error) {
+		encodedTOML, err := ioutil.ReadFile(path)
+		if err != nil {
+			return "", err
+		}
 
-	out := make(map[string]interface{})
-	if _, err := toml.Decode(string(data), &out); err != nil {
-		return nil, err
-	}
+		decodedTOML := map[string]interface{}{}
+		if _, err := toml.Decode(string(encodedTOML), &decodedTOML); err != nil {
+			return "", err
+		}
 
-	return FlattenJSON(out, "")
+		settings, err := flattenJSON(decodedTOML, "")
+		if err != nil {
+			return "", err
+		}
+
+		return settings[key], nil
+	}
 }
