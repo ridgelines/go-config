@@ -18,7 +18,7 @@ The `go-config` package has three main components: **providers**, **settings**, 
 * `JSONFile`  - Loads settings from a `.json` file
 * `YAMLFile` - Loads settings from a `.yaml` file
 * `TOMLFile` - Loads settings from a `.toml` file
-* `CLI` - Loads settings from a [codegansta/cli](https://github.com/codegangsta/cli) context
+* `CLI` - Loads settings from a [urfave/cli](https://github.com/urfave/cli) context
 * `Environment` - Loads settings from environment variables 
 * `Static` - Loads settings from an in-memory map
 
@@ -148,9 +148,11 @@ Since environment variables should override the values in `config.ini`, put the 
 
 ## CLI Provider Example
 In addition to files and environment variables, applications tend to use command line arguments for configuration.
-One of the most popular command line tool for golang is [Jeremy Saenz's CLI](https://github.com/codegangsta/cli).
+One of the most popular command line tool for golang is [urfave/cli](https://github.com/urfave/cli).
 This tool does an excellent job of allowing users to configure their applications using 
-[flags](https://github.com/codegangsta/cli#flags) and [environment variables](https://github.com/codegangsta/cli#values-from-the-environment).
+[flags](https://github.com/
+
+angsta/cli#flags) and [environment variables](https://github.com/urfave/cli#values-from-the-environment).
 This works great for many applications, but can easily become messy when settings need to be loaded from other sources.
 The `CLI` provider aims to make configuration management from any number of providers as simple as possible.
 
@@ -168,7 +170,8 @@ silent: false
 package main 
 
 import (
-    "github.com/codegangsta/cli"
+    "github.com/
+    "githbu.com/urfave/cli"
     "github.com/zpatrick/go-config"
     "log"
     "os"
