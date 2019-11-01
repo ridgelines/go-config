@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 type CLI struct {
