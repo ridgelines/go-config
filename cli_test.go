@@ -38,8 +38,7 @@ func TestCLILoad(t *testing.T) {
 
 		actualSettings, err := cliProvider.Load()
 		if err != nil {
-			t.Error(err)
-			return err
+			t.Fatal(err)
 		}
 
 		for key, expected := range expectedSettings {
