@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/urfave/cli"
 	"testing"
+
+	"github.com/urfave/cli"
 )
 
 func TestCLILoad(t *testing.T) {
@@ -10,21 +11,21 @@ func TestCLILoad(t *testing.T) {
 
 	app := cli.NewApp()
 	app.Flags = []cli.Flag{
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name: "timeout",
 		},
-		cli.Float64Flag{
+		&cli.Float64Flag{
 			Name: "frequency",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name: "time_zone",
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name: "enabled",
 		},
 	}
 
-	app.Action = func(c *cli.Context) {
+	app.Action = func(c *cli.Context) error {
 		executed = true
 		cliProvider := NewCLI(c, false)
 
@@ -37,7 +38,7 @@ func TestCLILoad(t *testing.T) {
 
 		actualSettings, err := cliProvider.Load()
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		for key, expected := range expectedSettings {
@@ -51,6 +52,7 @@ func TestCLILoad(t *testing.T) {
 				t.Errorf("Setting '%s' was '%s', expected '%s'", key, actual, expected)
 			}
 		}
+		return err
 	}
 
 	app.Run(

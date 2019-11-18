@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+
 	"github.com/urfave/cli"
 )
 
@@ -19,16 +20,6 @@ func NewCLI(context *cli.Context, useDefaults bool) *CLI {
 
 func (this *CLI) Load() (map[string]string, error) {
 	settings := map[string]string{}
-
-	for _, flag := range this.context.GlobalFlagNames() {
-		val := fmt.Sprintf("%v", this.context.GlobalGeneric(flag))
-
-		if this.context.GlobalIsSet(flag) {
-			settings[flag] = val
-		} else if this.useDefaults && val != "" {
-			settings[flag] = val
-		}
-	}
 
 	for _, flag := range this.context.FlagNames() {
 		val := fmt.Sprintf("%v", this.context.Generic(flag))
