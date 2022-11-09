@@ -4,7 +4,7 @@ The `go-config` package is used to simplify configuration for go applications.
 # Installation
 To install this package, run:
 ```
-go get github.com/zpatrick/go-config
+go get github.com/ridgelines/go-config
 ```
 
 # The Basics
@@ -172,7 +172,9 @@ package main
 import (
     "github.com/
     "githbu.com/urfave/cli"
-    "github.com/zpatrick/go-config"
+    "github.com/ridgelines
+    
+    /go-config"
     "log"
     "os"
 )
